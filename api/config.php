@@ -3,11 +3,11 @@
 // BBShoots — config.php  (FIXED v2)
 // ============================================
 
-define('DB_HOST', 'sql305.iceiy.com');
-define('DB_NAME', 'icei_41328066_bbshoots');
-define('DB_USER', 'icei_41328066');
+define('DB_HOST', 'sql102.byetcluster.com');
+define('DB_NAME', 'if0_41323896_bbshoots');
+define('DB_USER', 'if0_41323896');
 define('DB_PASS', 'bbshoots2026'); // password you use to login to AeonFree
-define('APP_URL', 'http://bbshoots.iceiy.com/');
+define('APP_URL', 'http://bbshoots.42web.io/');
 
 define('ADMIN_EMAIL',    'bbshoots49@gmail.com');
 define('ADMIN_PASSWORD', 'BBShoots@2025');
@@ -116,4 +116,10 @@ function requireClient(): void {
     if (empty($_SESSION['client_id'])) {
         resp(false, null, 'Login required.', 401);
     }
+
+    $allowed = [
+    'http://localhost',
+    'http://bbshoots.42web.io',
+    'https://bbshoots.42web.io',
+];
 }
