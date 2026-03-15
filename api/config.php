@@ -1,68 +1,99 @@
 <?php
 // ============================================
-// BBShoots — config.php  (FIXED v2)
+// BBShoots — config.php  (FIXED v3)
 // ============================================
 
+// ── Database Configuration ─────────────────────────────
 define('DB_HOST', 'sql102.byetcluster.com');
+define('DB_PORT', 3306);  // ✅ FIXED: Added missing port definition
 define('DB_NAME', 'if0_41323896_bbshoots');
 define('DB_USER', 'if0_41323896');
-define('DB_PASS', 'bbshoots2026'); // password you use to login to AeonFree
-define('APP_URL', 'http://bbshoots.42web.io/');
+define('DB_PASS', 'bbshoots2026');
 
+// ── Application URL (single definition) ─────────────────
+// Auto-detect based on host
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+if (strpos($host, 'localhost') !== false) {
+    define('APP_URL', 'http://localhost/bbshoots');
+} else {
+    define('APP_URL', 'http://' . $host);
+}
+
+// ── Admin Credentials ──────────────────────────────────
 define('ADMIN_EMAIL',    'bbshoots49@gmail.com');
 define('ADMIN_PASSWORD', 'BBShoots@2025');
 
+// ── Email Configuration (PHPMailer) ─────────────────────
 define('MAIL_HOST',      'smtp.gmail.com');
 define('MAIL_PORT',      587);
 define('MAIL_USERNAME',  'bbshoots49@gmail.com');
-define('MAIL_PASSWORD',  'YOUR_GMAIL_APP_PASSWORD');
+define('MAIL_PASSWORD',  'YOUR_GMAIL_APP_PASSWORD');  // Replace with your Gmail App Password
 define('MAIL_FROM',      'bbshoots49@gmail.com');
 define('MAIL_FROM_NAME', 'BBShoots Productions');
 
-define('APP_URL', 'http://localhost/bbshoots');
-
-// ── Session FIRST — before any headers ───────
-// Must start session before sending any output
+// ── Session Configuration ──────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
-    // Fix: use specific cookie settings so session persists across requests
     session_name('BBSHOOTS');
+    
+    // Auto-detect cookie domain
+    $cookieDomain = '';
+    if (strpos($host, 'localhost') === false) {
+        // Live server - use actual domain without port
+        $cookieDomain = preg_replace('/:\d+$/', '', $host);
+    } else {
+        $cookieDomain = 'localhost';
+    }
+    
     ini_set('session.cookie_path',     '/');
     ini_set('session.cookie_httponly', '1');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.gc_maxlifetime',  '86400'); // 24 hours
+    
     session_set_cookie_params([
         'lifetime' => 86400,
         'path'     => '/',
-        'domain'   => 'localhost',
-        'secure'   => false,
+        'domain'   => $cookieDomain,
+        'secure'   => false,  // Set to true if using HTTPS
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
     session_start();
 }
 
-// ── CORS Headers — MUST allow credentials ────
-// Cannot use * with credentials=true — use exact origin
-$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'http://localhost';
+// ── CORS Headers ───────────────────────────────────────
+$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
-// Allow localhost on any port
+// Allow localhost on any port OR the live domain
+$allowedOrigins = [
+    'http://localhost',
+    'http://bbshoots.42web.io',
+    'https://bbshoots.42web.io',
+];
+
+// Check if origin is allowed (including localhost with any port)
+$isAllowed = false;
 if (preg_match('#^https?://localhost(:\d+)?$#', $origin)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-} else {
-    header('Access-Control-Allow-Origin: http://bbshoots.iceiy.com/');
+    $isAllowed = true;
+} elseif (in_array($origin, $allowedOrigins)) {
+    $isAllowed = true;
 }
 
-header('Access-Control-Allow-Credentials: true');   // ← THIS is what was missing
+if ($isAllowed && $origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
 header('Content-Type: application/json; charset=utf-8');
 
+// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// ── DB Connection ─────────────────────────────
+// ── Database Connection ────────────────────────────────
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
@@ -75,13 +106,14 @@ function getDB(): PDO {
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
         } catch (PDOException $e) {
-            resp(false, null, 'Database error: ' . $e->getMessage(), 500);
+            // Return JSON error instead of crashing
+            resp(false, null, 'Database connection failed: ' . $e->getMessage(), 500);
         }
     }
     return $pdo;
 }
 
-// ── Helpers ───────────────────────────────────
+// ── Helper Functions ───────────────────────────────────
 function resp(bool $ok, $data = null, string $msg = '', int $code = 200): void {
     http_response_code($code);
     echo json_encode(['success' => $ok, 'data' => $data, 'error' => $msg]);
@@ -116,10 +148,4 @@ function requireClient(): void {
     if (empty($_SESSION['client_id'])) {
         resp(false, null, 'Login required.', 401);
     }
-
-    $allowed = [
-    'http://localhost',
-    'http://bbshoots.42web.io',
-    'https://bbshoots.42web.io',
-];
 }
