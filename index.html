@@ -242,7 +242,6 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:36px 24
 .sec-lbl{font-size:12px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
 .sec-lbl span.num{color:var(--red)}
 .sec-lbl span.line{flex:1;height:1px;background:var(--border)}
-<p style="color:var(--muted);font-size:12px;margin-top:6px"><a href="bbshoots49@gmail.com">bbshoots49@gmail.com</a> · +91 6304828347</p>
 </style>
 </head>
 <body>
@@ -347,7 +346,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:36px 24
       <p class="sec-sub">Ready to create something extraordinary? We'd love to hear from you.</p>
       <div class="contact-grid">
         <div class="reveal">
-          <div class="ci"><div class="ci-icon">📧</div><div><div class="ci-lbl">Email</div><div class="ci-val"><a href="bbshoots49@gmail.com">bbshoots49@gmail.com</a></div></div></div>
+          <div class="ci"><div class="ci-icon">📧</div><div><div class="ci-lbl">Email</div><div class="ci-val"><a href="#">bbshoots49@gmail.com</a></div></div></div>
           <div class="ci"><div class="ci-icon">📞</div><div><div class="ci-lbl">Phone</div><div class="ci-val">+91 6304828347</div></div></div>
           <div class="ci"><div class="ci-icon">📍</div><div><div class="ci-lbl">Location</div><div class="ci-val">NarasaraoPet, Andhra Pradesh</div></div></div>
           <div class="ci"><div class="ci-icon">📸</div><div><div class="ci-lbl">Instagram</div><div class="ci-val">@bbshoots_official</div></div></div>
@@ -368,7 +367,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:36px 24
   <footer>
     <div class="f-logo">BB<span>SHOOTS</span></div>
     <p class="f-sub">© 2026 BBShoots Productions · NarasaraoPet, Andhra Pradesh</p>
-    <p style="color:var(--muted);font-size:12px;margin-top:6px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e6c6c7d6661617a7d3a374e69636f6762206d6163">bbshoots49@gmail.com</a> · +91 6304828347</p>
+    <p style="color:var(--muted);font-size:12px;margin-top:6px"><a href="bbshoots49@gmail.com">bbshoots49@gmail.com</a> · +91 6304828347</p>
   </footer>
 </div>
 
@@ -551,14 +550,9 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:36px 24
 </div>
 <script>
 // ═══════════════════════════════════════════════
-// API PATH — auto-detects, works on any folder name
+// API PATH — works on InfinityFree (relative to current folder)
 // ═══════════════════════════════════════════════
-const API_BASE = (function() {
-  const parts = window.location.pathname.split('/');
-  // find index of folder (e.g. 'bbshoots') — it's whatever is after the first /
-  const base = window.location.origin + '/' + (parts[1] || 'bbshoots');
-  return base + '/api/index.php';
-})();
+const API_BASE = 'api/index.php';   // <--- CHANGED FOR INFINITYFREE
 
 // ── State ─────────────────────────────────────
 let currentUser = null;
@@ -579,11 +573,11 @@ async function api(action, data) {
     try { return JSON.parse(text); }
     catch(e) {
       console.error('API non-JSON [' + action + ']:', text.substring(0, 400));
-      return { success: false, error: 'Server returned non-JSON. Check PHP & database are running in XAMPP.' };
+      return { success: false, error: 'Server returned non-JSON. Check PHP & database are configured.' };
     }
   } catch(e) {
     console.error('API fetch error:', e);
-    return { success: false, error: 'Cannot reach server. Make sure Apache is running in XAMPP.' };
+    return { success: false, error: 'Cannot reach server. Make sure the API path is correct.' };
   }
 }
 
@@ -862,6 +856,8 @@ async function doRegister() {
     updateNavUser();
     showDash();
     toast('Account created! Welcome to BBShoots 🎬', 'ok');
+    // WhatsApp notification after successful registration
+    openWhatsApp(`Hello, I just registered on BBShoots. My name is ${name}. Please assist me.`);
   } else {
     toast(res.error || 'Registration failed.', 'err');
   }
@@ -970,9 +966,17 @@ function fmtDate(s) {
   catch(e) { return s; }
 }
 // ── WhatsApp ─────────────────────────────────────
-const ADMIN_WHATSAPP = '916304828347'; // your WhatsApp number with country code // Change this number in VSCode (include country code without + or spaces)
-function openWhatsApp() {
-  const url = `https://wa.me/${ADMIN_WHATSAPP}`;
+const ADMIN_WHATSAPP = '916304828347'; // your WhatsApp number with country code (without + or spaces)
+
+/**
+ * Opens WhatsApp chat with the admin.
+ * @param {string} message - Optional pre‑filled message (will be URL‑encoded)
+ */
+function openWhatsApp(message) {
+  let url = `https://wa.me/${ADMIN_WHATSAPP}`;
+  if (message) {
+    url += '?text=' + encodeURIComponent(message);
+  }
   window.open(url, '_blank');
 }
 </script>
