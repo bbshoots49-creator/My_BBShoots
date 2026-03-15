@@ -546,8 +546,16 @@ select option{background:var(--bg2)}
    API — XMLHttpRequest, auto path detection
 ══════════════════════════════════════════════ */
 var API=(function(){
-  var p=window.location.pathname.replace(/\/+$/,'').split('/');
-  return window.location.protocol+'//'+window.location.host+'/'+(p[1]||'bbshoots')+'/api/index.php';
+  var host = window.location.host;
+  var protocol = window.location.protocol;
+  // Check if running on localhost (development)
+  if (host.indexOf('localhost') !== -1 || host.indexOf('127.0.0.1') !== -1) {
+    // Local development: /bbshoots/api/index.php
+    return protocol + '//' + host + '/bbshoots/api/index.php';
+  } else {
+    // Live server: /api/index.php (no subfolder)
+    return protocol + '//' + host + '/api/index.php';
+  }
 }());
 
 function callAPI(action, params, data, onOk, onErr) {
