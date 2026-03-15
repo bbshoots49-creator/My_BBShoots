@@ -160,7 +160,7 @@ function mailAdminNewBooking(array $b): bool {
 <div class="row"><span class="lbl">Package</span><span class="val">' . $b['package'] . '</span></div>
 <div class="row"><span class="lbl">Notes</span><span class="val">' . ($b['notes'] ?: 'None') . '</span></div>
 </div>
-<p><a href="http://localhost/bbshoots/admin/" style="background:#dc2626;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Open Admin Panel &#8594;</a></p>';
+<p><a href="' . APP_URL . '/admin/" style="background:#dc2626;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Open Admin Panel &#8594;</a></p>';
     return sendMail(ADMIN_EMAIL, 'BBShoots Admin',
         '🔔 New Booking: ' . $b['booking_ref'] . ' — ' . $b['event_type'], wrap($content));
 }
